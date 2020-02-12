@@ -1,9 +1,40 @@
 import pygame
+import sys
+from socket import AF_INET, socket, SOCK_STREAM
 import numpy as np
 from triangulos import Triangulo
 from bolas import Bola
 from caixadochat import CaixaChat
 from digitacaodotexto import TextoEntrada
+from Botao import Botao
+
+
+def send(mensagem, client_socket):
+    mensagem = mensagem.encode('utf-8')
+    mensagem_header = f"{len(mensagem):<{10}}".encode('utf-8')
+    client_socket.send(mensagem_header + mensagem)
+
+
+def receive(client_socket):
+    mensagem_header = client_socket.recv(10)
+    if not len(mensagem_header):
+        print('Connection closed by the server')
+        sys.exit()
+    mensagem_length = int(mensagem_header.decode('utf-8').strip())
+    mensagem = client_socket.recv(mensagem_length).decode('utf-8')
+    return mensagem
+
+
+HOST = input("Qual o IP do servidor que você deseja conectar?")
+PORT = 33000
+ADDR = (HOST, PORT)
+
+client_socket = socket(AF_INET, SOCK_STREAM)
+client_socket.connect(ADDR)
+client_socket.setblocking(False)
+
+name = input("Digite o seu nome:")
+send(name, client_socket)
 
 preto = (0, 0, 0, 255)
 roxo = (128, 0, 128, 255)
@@ -13,6 +44,7 @@ verde = (0, 255, 0, 255)
 branco = (255, 255, 255, 255)
 brancola = (255, 255, 254, 255)
 cinza = (128, 128, 128, 255)
+azul = (0, 0, 255, 255)
 MOUSE_LEFT = 1
 MOUSE_RIGHT = 3
 pygame.init()
@@ -21,19 +53,37 @@ screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Bizingo")
 circulos = []
 screen.fill(cinza)
+# inicializando o botao de passar turno
+botao_passar_turno = Botao("Passar a vez", (0, 0, 0), azul)
+botao_passar_turno.desenha_botao(screen, 150, 450, 200, 50)
+# inicializando o botao de enviar mensagens
+send_mensage_button = Botao("Enviar", (255, 1, 127), brancola)
+send_message_button_rect = send_mensage_button.desenha_botao(screen, 920, 490, 200, 50)
+# inicializando o botao de desistir , mas nao ta funcionando ainda
+botao_desistir = Botao("Desistir", (255, 51, 255), azul)
+botao_desistir_rect = botao_desistir.desenha_botao(screen, 150, 650, 200, 50)
+# inicializando a caixa do chat
+caixa_chat = CaixaChat(screen, 500, 80, 600, 350, brancola)
+# inicializando a caixa de entrada de texto
+texto_entrada = TextoEntrada(screen, 500, 460, 400, 110, brancola, "")
+retangulodobotao = pygame.draw.rect(screen, (0, 0, 0), (150, 450, 200, 50))
+input_para_caixa_do_chat = ""
 
 
-def verifica_dentro_do_triangulo(x1, y1, x2, y2, x3, y3, a, b, ):
-    pass
+def message_display(x, y, text, size, cor):
+    largeText = pygame.font.Font('freesansbold.ttf', size)
+    TextSurf, TextRect = text_objects(text, largeText, cor)
+    TextRect.center = (x, y)
+    pygame.display.get_surface().blit(TextSurf, TextRect)
+
+
+def text_objects(text, font, cor):
+    textSurface = font.render(text, True, cor)
+    return textSurface, textSurface.get_rect()
 
 
 def verifica_dentro_do_circulo(x, y, a, b, r):
     return (x - a) * (x - a) + (y - b) * (y - b) < r * r
-
-
-def centraliza_bola(circulo, x, y):
-    tabuleiro.desenha_tabuleiro(screen)
-    pygame.display.flip()
 
 
 def muda_posicao_circulo(circulo, x_desejada, y_desejado):
@@ -87,11 +137,12 @@ def muda_posicao_circulo(circulo, x_desejada, y_desejado):
     pygame.display.flip()
 
 
-def fazer_bola_sumir(circulo):
-    circulo.set_x_y((0, 0))
-    circulo.set_cor(cinza)
-    tabuleiro.desenha_tabuleiro(screen)
+def enviar_mensagem(input, jogador_atual):
+    texto_entrada.clean_input()
     pygame.display.flip()
+    caixa_chat.adiciona_texto(jogador_atual, input)
+    caixa_chat.atualiza_tela_chatarray(jogador_atual)
+    send(input, client_socket)
 
 
 class Tabuleiro():
@@ -219,19 +270,14 @@ class Tabuleiro():
             if verifica_dentro_do_circulo(x, y, a, b, 7):
                 return circolo
 
-    # def verifica_se_e_triangulo(self, x, y):
-    #     for triangolo in self.triangulos:
-    #         if triangolo.collidepoint(x, y):
-    #             a, b, c, d, e, f = triangolo.get_x_y_z()
-    #             print(a, b, c, d, e, f)
-    #             return triangolo
-
     def verifica_se_peca_foi_comida(self, circulo):
         x, y = circulo.get_x_y()
         count = 0
         cor = circulo.get_cor()
+        print(cor)
         eh_preto_ou_roxo = (cor == preto) or (cor == roxo)
         eh_amarelo_ou_vermelho = (cor == amarelo) or (cor == vermelho)
+        print(eh_amarelo_ou_vermelho)
         if eh_preto_ou_roxo:
             for circolo in self.bolas:
                 (a, b) = circolo.get_x_y()
@@ -249,7 +295,6 @@ class Tabuleiro():
                                 (a, b) = circolo_dentro_do_triangulo.get_x_y()
                                 verifica_se_ta_dentro_pela_esquerda = (a == x - 15) and (b == y - 17)
                                 if verifica_se_ta_dentro_pela_esquerda:
-                                    print("carai borracha")
                                     circolo_dentro_do_triangulo.set_x_y((0, 0))
                                     circolo_dentro_do_triangulo.set_cor(cinza)
                 elif verifica_se_ta_do_lado_direito:
@@ -261,7 +306,6 @@ class Tabuleiro():
                                 (a, b) = circulo_dentro_do_triangulo.get_x_y()
                                 verifica_se_ta_dentro_pela_direita = (a == x + 15) and (b == y - 17)
                                 if verifica_se_ta_dentro_pela_direita:
-                                    print("carai borracha 2")
                                     circulo_dentro_do_triangulo.set_x_y((0, 0))
                                     circulo_dentro_do_triangulo.set_cor(cinza)
                 elif verifica_se_ta_em_baixo_direita:
@@ -273,46 +317,91 @@ class Tabuleiro():
                                 (a, b) = circulo_dentro_do_triangolo.get_x_y()
                                 verifica_se_ta_dentro_pela_direita = (a == x) and (b == y + 21)
                                 if verifica_se_ta_dentro_pela_direita:
-                                    print("carai borracha 3")
                                     circulo_dentro_do_triangolo.set_x_y((0, 0))
                                     circulo_dentro_do_triangolo.set_cor(cinza)
-
-        else:
-            pass
+        elif eh_amarelo_ou_vermelho:
+            print("entrei aqui")
+            for circolo in self.bolas:
+                (a, b) = circolo.get_x_y()
+                verifica_se_ta_em_cima_esquerda = (a == x - 15) and (b == y - 38)
+                verifica_se_ta_em_cima_direita = (a == x + 15) and (b == y - 38)
+                verifica_se_ta_em_baixo_direita = (a == x + 15) and (b == y + 38)
+                verifica_se_ta_em_baixo_esquerda = (a == x - 15) and (b == y + 38)
+                verifica_se_ta_do_lado_direito = (a == x + 30) and (b == y)
+                verifica_se_ta_do_lado_esquerdo = (a == x - 30) and (b == y)
+                if verifica_se_ta_do_lado_esquerdo:
+                    print("entrei aqui2")
+                    for circolo_do_lado_esquerdo in self.bolas:
+                        (a, b) = circolo_do_lado_esquerdo.get_x_y()
+                        verifica_se_ta_em_baixo_esquerda = (a == x - 15) and (b == y + 38)
+                        if verifica_se_ta_em_baixo_esquerda:
+                            print("entrei aqui3")
+                            for circolo_dentro_do_triangulo in self.bolas:
+                                (a, b) = circolo_dentro_do_triangulo.get_x_y()
+                                verifica_se_ta_dentro_pela_esquerda = (a == x - 15) and (b == y + 17)
+                                if verifica_se_ta_dentro_pela_esquerda:
+                                    print("entrei aqui 4")
+                                    circolo_dentro_do_triangulo.set_x_y((0, 0))
+                                    circolo_dentro_do_triangulo.set_cor(cinza)
+                elif verifica_se_ta_do_lado_direito:
+                    for circolo_do_lado_direito in self.bolas:
+                        (a, b) = circolo_do_lado_direito.get_x_y()
+                        verifica_se_tem_em_baixo_direito = (a == x + 15) and (b == y + 38)
+                        if verifica_se_tem_em_baixo_direito:
+                            for circulo_dentro_do_triangulo in self.bolas:
+                                (a, b) = circulo_dentro_do_triangulo.get_x_y()
+                                verifica_se_ta_dentro_pela_direita = (a == x - 15) and (b == y + 17)
+                                if verifica_se_ta_dentro_pela_direita:
+                                    circulo_dentro_do_triangulo.set_x_y((0, 0))
+                                    circulo_dentro_do_triangulo.set_cor(cinza)
+                elif verifica_se_ta_em_cima_direita:
+                    for circolo_do_lado_esqurdo in self.bolas:
+                        (a, b) = circolo_do_lado_esqurdo.get_x_y()
+                        verifica_se_tem_do_lado_esquerdo_em_cima = (a == x - 15) and (b == y - 38)
+                        if verifica_se_tem_do_lado_esquerdo_em_cima:
+                            for circulo_dentro_do_triangolo in self.bolas:
+                                (a, b) = circulo_dentro_do_triangolo.get_x_y()
+                                verifica_se_ta_dentro_pela_direita = (a == x) and (b == y - 21)
+                                if verifica_se_ta_dentro_pela_direita:
+                                    circulo_dentro_do_triangolo.set_x_y((0, 0))
+                                    circulo_dentro_do_triangolo.set_cor(cinza)
         tabuleiro.desenha_tabuleiro(screen)
         pygame.display.flip()
-        # elif eh_amarelo_ou_vermelho:
 
 
+jogador_atual = "verde"
 tabuleiro = Tabuleiro()
 tabuleiro.desenha_tabuleiro(screen)
-caixa_chat = CaixaChat(screen, 500, 80, 600, 350, brancola)
-texto_entrada = TextoEntrada(screen, 500, 460, 400, 110, brancola, "")
-input_para_caixa_do_chat = ""
 done = False
 clock = pygame.time.Clock()
 mover = True
 
 while not done:
-    # This limits the while loop to a max of 10 times per second.
-    # Leave this out and we will use all CPU we can.
-    # Go ahead and update the screen with what we've drawn.
-    # This MUST happen after all the other drawing commands.
-    pygame.display.flip()
-    clock.tick(10)
+
     for event in pygame.event.get():  # User did something
+        try:
+            mensagem = receive(client_socket)
+            print("mensagem do outro cara: " + mensagem)
+            caixa_chat.adiciona_texto(jogador_atual, mensagem)
+            caixa_chat.atualiza_tela_chatarray(jogador_atual)
+        except:
+            pass
         if event.type == pygame.QUIT:  # If user clicked close
             done = True  # Flag that we are done so we exit this loop
         teste = True
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == MOUSE_LEFT:
+                if texto_entrada.get_input_text_rect().collidepoint(event.pos):
+                    texto_entrada.handle_event(event)
+                # SE CLICAR NO BOTAO DE ENVIAR MENSAGEM ENVIA A MENSAGEM PRA CAIXA DO CHAT
+                elif send_message_button_rect.collidepoint(event.pos):
+                    print("Minha mensagem: " + input_para_caixa_do_chat)
+                    enviar_mensagem(name + ": " + input_para_caixa_do_chat, jogador_atual)
                 if len(circulos) < 2:
                     position_mouse = pygame.mouse.get_pos()
                     color = screen.get_at(pygame.mouse.get_pos())
                     x_desejada = position_mouse[0]
                     y_desejado = position_mouse[1]
-                    # triangulo = tabuleiro.verifica_se_e_triangulo(x_desejada,y_desejado)
-                    # print(triangulo)
                     circulo = tabuleiro.verifica_se_e_bola(x_desejada, y_desejado)
                     if len(circulos) == 0 and circulo is not None:
                         circulos.append(circulo)
@@ -322,8 +411,8 @@ while not done:
                                 0].get_cor() == vermelho) and color == branco):
                         x_desejada = position_mouse[0]
                         y_desejado = position_mouse[1]
-
                         muda_posicao_circulo(circulos[0], x_desejada, y_desejado)
+                        tabuleiro.verifica_se_peca_foi_comida(circulos[0])
                         circulos = []
                     elif len(circulos) == 1 and (
                             (circulos[0].get_cor() == preto or circulos[0].get_cor() == roxo) and color == verde):
@@ -334,6 +423,9 @@ while not done:
                         circulos = []
                     else:
                         circulos = []
-
+        if event.type == pygame.KEYDOWN:
+            texto_entrada.handle_event(event)
+            input_para_caixa_do_chat = texto_entrada.draw(screen)
+            pygame.display.flip()
 # Be IDLE friendly
 pygame.quit()
