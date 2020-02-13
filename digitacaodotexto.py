@@ -60,7 +60,7 @@ class TextoEntrada:
         if len(self.texto) < 60:
             pygame.draw.rect(screen, self.cor, (850, 540, 50, 30))
         else:
-            pygame.draw.rect(screen, red, (850, 540, 50, 30))
+            pygame.draw.rect(screen, vermelho, (850, 540, 50, 30))
         self.screen.blit(self.quantity_of_number, (850, 540))
         pygame.display.flip()
         return self.texto

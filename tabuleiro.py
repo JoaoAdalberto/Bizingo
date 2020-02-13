@@ -9,6 +9,9 @@ from digitacaodotexto import TextoEntrada
 from Botao import Botao
 
 
+# from send_receive_socket_cliente import *
+
+
 def send(mensagem, client_socket):
     mensagem = mensagem.encode('utf-8')
     mensagem_header = f"{len(mensagem):<{10}}".encode('utf-8')
@@ -16,24 +19,37 @@ def send(mensagem, client_socket):
 
 
 def receive(client_socket):
+    username_header = client_socket.recv(10)
+
+    # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
+    if not len(username_header):
+        print('Connection closed by the server')
+        sys.exit()
+
+    # Convert header to int value
+    username_length = int(username_header.decode('utf-8').strip())
+
+    # Receive and decode username
+    username = client_socket.recv(username_length).decode('utf-8')
+
     mensagem_header = client_socket.recv(10)
     if not len(mensagem_header):
         print('Connection closed by the server')
         sys.exit()
     mensagem_length = int(mensagem_header.decode('utf-8').strip())
     mensagem = client_socket.recv(mensagem_length).decode('utf-8')
-    return mensagem
+    return mensagem, username
 
 
 HOST = input("Qual o IP do servidor que você deseja conectar?")
 PORT = 33000
-ADDR = (HOST, PORT)
 
 client_socket = socket(AF_INET, SOCK_STREAM)
-client_socket.connect(ADDR)
+client_socket.connect((HOST, PORT))
 client_socket.setblocking(False)
 
 name = input("Digite o seu nome:")
+#name = "Pedroo"
 send(name, client_socket)
 
 preto = (0, 0, 0, 255)
@@ -54,8 +70,8 @@ pygame.display.set_caption("Bizingo")
 circulos = []
 screen.fill(cinza)
 # inicializando o botao de passar turno
-botao_passar_turno = Botao("Passar a vez", (0, 0, 0), azul)
-botao_passar_turno.desenha_botao(screen, 150, 450, 200, 50)
+botao_passar_turno = Botao("Passar a vez", (128, 0, 128), roxo)
+botao_passar_turno.desenha_botao(screen, 150, 550, 200, 50)
 # inicializando o botao de enviar mensagens
 send_mensage_button = Botao("Enviar", (255, 1, 127), brancola)
 send_message_button_rect = send_mensage_button.desenha_botao(screen, 920, 490, 200, 50)
@@ -66,7 +82,6 @@ botao_desistir_rect = botao_desistir.desenha_botao(screen, 150, 650, 200, 50)
 caixa_chat = CaixaChat(screen, 500, 80, 600, 350, brancola)
 # inicializando a caixa de entrada de texto
 texto_entrada = TextoEntrada(screen, 500, 460, 400, 110, brancola, "")
-retangulodobotao = pygame.draw.rect(screen, (0, 0, 0), (150, 450, 200, 50))
 input_para_caixa_do_chat = ""
 
 
@@ -86,63 +101,68 @@ def verifica_dentro_do_circulo(x, y, a, b, r):
     return (x - a) * (x - a) + (y - b) * (y - b) < r * r
 
 
-def muda_posicao_circulo(circulo, x_desejada, y_desejado):
-    a, b = circulo.get_x_y()
-    cor = circulo.get_cor()
-    eh_preto_ou_roxo = (cor == preto) or (cor == roxo)
-    eh_amarelo_ou_vermelho = (cor == amarelo) or (cor == vermelho)
-    if eh_preto_ou_roxo:
-        preto_ou_roxo_quer_ir_para_direita = (a + 45 > x_desejada > a + 15 and b - 28 < y_desejado < b + 10)
-        preto_ou_roxo_quer_ir_para_esquerda = (a - 15 > x_desejada > a - 45 and b - 28 < y_desejado < b + 10)
-        preto_ou_roxo_quer_ir_para_diagonal_direita_cima = (a + 30 > x_desejada > a and b - 28 > y_desejado > b - 66)
-        preto_ou_roxo_quer_ir_para_diagonal_direita_baixo = (a + 30 > x_desejada > a and b + 10 < y_desejado < b + 48)
-        preto_ou_roxo_quer_ir_para_diagonal_esquerda_cima = (a - 30 < x_desejada < a and b - 28 > y_desejado > b - 66)
-        preto_ou_roxo_quer_ir_para_diagonal_esquerda_baixo = (a - 30 < x_desejada < a and b + 10 < y_desejado < b + 48)
-        if preto_ou_roxo_quer_ir_para_direita:
-            circulo.set_x_y((a + 30, b))
-        elif preto_ou_roxo_quer_ir_para_esquerda:
-            circulo.set_x_y((a - 30, b))
-        elif preto_ou_roxo_quer_ir_para_diagonal_direita_cima:
-            circulo.set_x_y((a + 15, b - 38))
-        elif preto_ou_roxo_quer_ir_para_diagonal_direita_baixo:
-            circulo.set_x_y((a + 15, b + 38))
-        elif preto_ou_roxo_quer_ir_para_diagonal_esquerda_cima:
-            circulo.set_x_y((a - 15, b - 38))
-        elif preto_ou_roxo_quer_ir_para_diagonal_esquerda_baixo:
-            circulo.set_x_y((a - 15, b + 38))
-    elif eh_amarelo_ou_vermelho:
-        amarelo_ou_vermelho_quer_ir_para_direita = (a + 45 > x_desejada > a + 15 and b - 25 < y_desejado < b + 13)
-        amarelo_ou_vermelho_quer_ir_para_esquerda = (a - 15 > x_desejada > a - 45 and b - 25 < y_desejado < b + 13)
-        amarelo_ou_vermelho_quer_ir_para_diagonal_direita_cima = (
-                a + 30 > x_desejada > a and b - 13 > y_desejado > b - 50)
-        amarelo_ou_vermelho_quer_ir_para_diagonal_direita_baixo = (
-                a + 30 > x_desejada > a and b + 25 < y_desejado < b + 62)
-        amarelo_ou_vermelho__quer_ir_para_diagonal_esquerda_cima = (
-                a - 30 < x_desejada < a and b - 13 > y_desejado > b - 50)
-        amarelo_ou_vermelho__quer_ir_para_diagonal_esquerda_baixo = (
-                a - 30 < x_desejada < a and b + 25 < y_desejado < b + 62)
-        if amarelo_ou_vermelho_quer_ir_para_direita:
-            circulo.set_x_y((a + 30, b))
-        elif amarelo_ou_vermelho_quer_ir_para_esquerda:
-            circulo.set_x_y((a - 30, b))
-        elif amarelo_ou_vermelho_quer_ir_para_diagonal_direita_cima:
-            circulo.set_x_y((a + 15, b - 38))
-        elif amarelo_ou_vermelho_quer_ir_para_diagonal_direita_baixo:
-            circulo.set_x_y((a + 15, b + 38))
-        elif amarelo_ou_vermelho__quer_ir_para_diagonal_esquerda_cima:
-            circulo.set_x_y((a - 15, b - 38))
-        elif amarelo_ou_vermelho__quer_ir_para_diagonal_esquerda_baixo:
-            circulo.set_x_y((a - 15, b + 38))
-    tabuleiro.desenha_tabuleiro(screen)
-    pygame.display.flip()
-
-
 def enviar_mensagem(input, jogador_atual):
     texto_entrada.clean_input()
     pygame.display.flip()
     caixa_chat.adiciona_texto(jogador_atual, input)
     caixa_chat.atualiza_tela_chatarray(jogador_atual)
-    send(input, client_socket)
+    send("CHAT " + input, client_socket)
+
+
+# def muda_posicao_circulo(circulo, x_desejada, y_desejado):
+#     a, b = circulo.get_x_y()
+#     cor = circulo.get_cor()
+#     eh_preto_ou_roxo = (cor == preto) or (cor == roxo)
+#     eh_amarelo_ou_vermelho = (cor == amarelo) or (cor == vermelho)
+#     if eh_preto_ou_roxo:
+#         preto_ou_roxo_quer_ir_para_direita = (a + 45 > x_desejada > a + 15 and b - 28 < y_desejado < b + 10)
+#         preto_ou_roxo_quer_ir_para_esquerda = (a - 15 > x_desejada > a - 45 and b - 28 < y_desejado < b + 10)
+#         preto_ou_roxo_quer_ir_para_diagonal_direita_cima = (a + 30 > x_desejada > a and b - 28 > y_desejado > b - 66)
+#         preto_ou_roxo_quer_ir_para_diagonal_direita_baixo = (a + 30 > x_desejada > a and b + 10 < y_desejado < b + 48)
+#         preto_ou_roxo_quer_ir_para_diagonal_esquerda_cima = (a - 30 < x_desejada < a and b - 28 > y_desejado > b - 66)
+#         preto_ou_roxo_quer_ir_para_diagonal_esquerda_baixo = (a - 30 < x_desejada < a and b + 10 < y_desejado < b + 48)
+#         if preto_ou_roxo_quer_ir_para_direita:
+#             circulo.set_x_y((a + 30, b))
+#         elif preto_ou_roxo_quer_ir_para_esquerda:
+#             circulo.set_x_y((a - 30, b))
+#         elif preto_ou_roxo_quer_ir_para_diagonal_direita_cima:
+#             circulo.set_x_y((a + 15, b - 38))
+#         elif preto_ou_roxo_quer_ir_para_diagonal_direita_baixo:
+#             circulo.set_x_y((a + 15, b + 38))
+#         elif preto_ou_roxo_quer_ir_para_diagonal_esquerda_cima:
+#             circulo.set_x_y((a - 15, b - 38))
+#         elif preto_ou_roxo_quer_ir_para_diagonal_esquerda_baixo:
+#             circulo.set_x_y((a - 15, b + 38))
+#     elif eh_amarelo_ou_vermelho:
+#         amarelo_ou_vermelho_quer_ir_para_direita = (a + 45 > x_desejada > a + 15 and b - 25 < y_desejado < b + 13)
+#         amarelo_ou_vermelho_quer_ir_para_esquerda = (a - 15 > x_desejada > a - 45 and b - 25 < y_desejado < b + 13)
+#         amarelo_ou_vermelho_quer_ir_para_diagonal_direita_cima = (
+#                 a + 30 > x_desejada > a and b - 13 > y_desejado > b - 50)
+#         amarelo_ou_vermelho_quer_ir_para_diagonal_direita_baixo = (
+#                 a + 30 > x_desejada > a and b + 25 < y_desejado < b + 62)
+#         amarelo_ou_vermelho__quer_ir_para_diagonal_esquerda_cima = (
+#                 a - 30 < x_desejada < a and b - 13 > y_desejado > b - 50)
+#         amarelo_ou_vermelho__quer_ir_para_diagonal_esquerda_baixo = (
+#                 a - 30 < x_desejada < a and b + 25 < y_desejado < b + 62)
+#         if amarelo_ou_vermelho_quer_ir_para_direita:
+#             circulo.set_x_y((a + 30, b))
+#         elif amarelo_ou_vermelho_quer_ir_para_esquerda:
+#             circulo.set_x_y((a - 30, b))
+#         elif amarelo_ou_vermelho_quer_ir_para_diagonal_direita_cima:
+#             circulo.set_x_y((a + 15, b - 38))
+#         elif amarelo_ou_vermelho_quer_ir_para_diagonal_direita_baixo:
+#             circulo.set_x_y((a + 15, b + 38))
+#         elif amarelo_ou_vermelho__quer_ir_para_diagonal_esquerda_cima:
+#             circulo.set_x_y((a - 15, b - 38))
+#         elif amarelo_ou_vermelho__quer_ir_para_diagonal_esquerda_baixo:
+#             circulo.set_x_y((a - 15, b + 38))
+#     tabuleiro.desenha_tabuleiro(screen)
+#     pygame.display.flip()
+
+
+def acao(message):
+    print(message)
+    return message.split()[0]
 
 
 class Tabuleiro():
@@ -274,10 +294,10 @@ class Tabuleiro():
         x, y = circulo.get_x_y()
         count = 0
         cor = circulo.get_cor()
-        print(cor)
+        # print(cor)
         eh_preto_ou_roxo = (cor == preto) or (cor == roxo)
         eh_amarelo_ou_vermelho = (cor == amarelo) or (cor == vermelho)
-        print(eh_amarelo_ou_vermelho)
+        # print(eh_amarelo_ou_vermelho)
         if eh_preto_ou_roxo:
             for circolo in self.bolas:
                 (a, b) = circolo.get_x_y()
@@ -320,7 +340,7 @@ class Tabuleiro():
                                     circulo_dentro_do_triangolo.set_x_y((0, 0))
                                     circulo_dentro_do_triangolo.set_cor(cinza)
         elif eh_amarelo_ou_vermelho:
-            print("entrei aqui")
+            # print("entrei aqui")
             for circolo in self.bolas:
                 (a, b) = circolo.get_x_y()
                 verifica_se_ta_em_cima_esquerda = (a == x - 15) and (b == y - 38)
@@ -330,17 +350,17 @@ class Tabuleiro():
                 verifica_se_ta_do_lado_direito = (a == x + 30) and (b == y)
                 verifica_se_ta_do_lado_esquerdo = (a == x - 30) and (b == y)
                 if verifica_se_ta_do_lado_esquerdo:
-                    print("entrei aqui2")
+                    # print("entrei aqui2")
                     for circolo_do_lado_esquerdo in self.bolas:
                         (a, b) = circolo_do_lado_esquerdo.get_x_y()
                         verifica_se_ta_em_baixo_esquerda = (a == x - 15) and (b == y + 38)
                         if verifica_se_ta_em_baixo_esquerda:
-                            print("entrei aqui3")
+                            # print("entrei aqui3")
                             for circolo_dentro_do_triangulo in self.bolas:
                                 (a, b) = circolo_dentro_do_triangulo.get_x_y()
                                 verifica_se_ta_dentro_pela_esquerda = (a == x - 15) and (b == y + 17)
                                 if verifica_se_ta_dentro_pela_esquerda:
-                                    print("entrei aqui 4")
+                                    # print("entrei aqui 4")
                                     circolo_dentro_do_triangulo.set_x_y((0, 0))
                                     circolo_dentro_do_triangulo.set_cor(cinza)
                 elif verifica_se_ta_do_lado_direito:
@@ -368,6 +388,70 @@ class Tabuleiro():
         tabuleiro.desenha_tabuleiro(screen)
         pygame.display.flip()
 
+    def muda_posicao_circulo(self, x_atual, y_atual,  x_desejada, y_desejado):
+        global circulo, a, b
+        #print("entrei aqui1")
+        for teste in self.bolas:
+            #print("entrei aqui2")
+            (a, b) = teste.get_x_y()
+            if verifica_dentro_do_circulo(x_atual, y_atual, a, b, 7):
+                circulo = teste
+                if circulo is not None:
+                    cor = circulo.get_cor()
+                    eh_preto_ou_roxo = (cor == preto) or (cor == roxo)
+                    eh_amarelo_ou_vermelho = (cor == amarelo) or (cor == vermelho)
+                    if eh_preto_ou_roxo:
+                        preto_ou_roxo_quer_ir_para_direita = (a + 45 > x_desejada > a + 15 and b - 28 < y_desejado < b + 10)
+                        preto_ou_roxo_quer_ir_para_esquerda = (a - 15 > x_desejada > a - 45 and b - 28 < y_desejado < b + 10)
+                        preto_ou_roxo_quer_ir_para_diagonal_direita_cima = (
+                                    a + 30 > x_desejada > a and b - 28 > y_desejado > b - 66)
+                        preto_ou_roxo_quer_ir_para_diagonal_direita_baixo = (
+                                    a + 30 > x_desejada > a and b + 10 < y_desejado < b + 48)
+                        preto_ou_roxo_quer_ir_para_diagonal_esquerda_cima = (
+                                    a - 30 < x_desejada < a and b - 28 > y_desejado > b - 66)
+                        preto_ou_roxo_quer_ir_para_diagonal_esquerda_baixo = (
+                                    a - 30 < x_desejada < a and b + 10 < y_desejado < b + 48)
+                        if preto_ou_roxo_quer_ir_para_direita:
+                            circulo.set_x_y((a + 30, b))
+                        elif preto_ou_roxo_quer_ir_para_esquerda:
+                            circulo.set_x_y((a - 30, b))
+                        elif preto_ou_roxo_quer_ir_para_diagonal_direita_cima:
+                            circulo.set_x_y((a + 15, b - 38))
+                        elif preto_ou_roxo_quer_ir_para_diagonal_direita_baixo:
+                            circulo.set_x_y((a + 15, b + 38))
+                        elif preto_ou_roxo_quer_ir_para_diagonal_esquerda_cima:
+                            circulo.set_x_y((a - 15, b - 38))
+                        elif preto_ou_roxo_quer_ir_para_diagonal_esquerda_baixo:
+                            circulo.set_x_y((a - 15, b + 38))
+                    elif eh_amarelo_ou_vermelho:
+                        amarelo_ou_vermelho_quer_ir_para_direita = (a + 45 > x_desejada > a + 15 and b - 25 < y_desejado < b + 13)
+                        amarelo_ou_vermelho_quer_ir_para_esquerda = (a - 15 > x_desejada > a - 45 and b - 25 < y_desejado < b + 13)
+                        amarelo_ou_vermelho_quer_ir_para_diagonal_direita_cima = (
+                                a + 30 > x_desejada > a and b - 13 > y_desejado > b - 50)
+                        amarelo_ou_vermelho_quer_ir_para_diagonal_direita_baixo = (
+                                a + 30 > x_desejada > a and b + 25 < y_desejado < b + 62)
+                        amarelo_ou_vermelho__quer_ir_para_diagonal_esquerda_cima = (
+                                a - 30 < x_desejada < a and b - 13 > y_desejado > b - 50)
+                        amarelo_ou_vermelho__quer_ir_para_diagonal_esquerda_baixo = (
+                                a - 30 < x_desejada < a and b + 25 < y_desejado < b + 62)
+                        if amarelo_ou_vermelho_quer_ir_para_direita:
+                            circulo.set_x_y((a + 30, b))
+                        elif amarelo_ou_vermelho_quer_ir_para_esquerda:
+                            circulo.set_x_y((a - 30, b))
+                        elif amarelo_ou_vermelho_quer_ir_para_diagonal_direita_cima:
+                            circulo.set_x_y((a + 15, b - 38))
+                        elif amarelo_ou_vermelho_quer_ir_para_diagonal_direita_baixo:
+                            circulo.set_x_y((a + 15, b + 38))
+                        elif amarelo_ou_vermelho__quer_ir_para_diagonal_esquerda_cima:
+                            circulo.set_x_y((a - 15, b - 38))
+                        elif amarelo_ou_vermelho__quer_ir_para_diagonal_esquerda_baixo:
+                            circulo.set_x_y((a - 15, b + 38))
+                    tabuleiro.desenha_tabuleiro(screen)
+                    pygame.display.flip()
+                    send("MOVE " + str(x_atual) + " " + str(y_atual) + " " + str(x_desejada) + " " +str(y_desejado),
+                         client_socket)
+
+
 
 jogador_atual = "verde"
 tabuleiro = Tabuleiro()
@@ -380,10 +464,22 @@ while not done:
 
     for event in pygame.event.get():  # User did something
         try:
-            mensagem = receive(client_socket)
-            print("mensagem do outro cara: " + mensagem)
-            caixa_chat.adiciona_texto(jogador_atual, mensagem)
-            caixa_chat.atualiza_tela_chatarray(jogador_atual)
+            mensagem, username = receive(client_socket)
+            if acao(mensagem) == "CHAT":
+                caixa_chat.adiciona_texto(jogador_atual, mensagem[5:])
+                caixa_chat.atualiza_tela_chatarray(jogador_atual)
+            elif acao(mensagem) == "MOVE":
+                args = mensagem.split()
+                # print("args 1: " + args[1])
+                # print("args 2: " + args[2])
+                # print("args 3: " + args[3])
+                # print("args 4: " + args[4])
+                # print(175 == int(args[1]))
+                tabuleiro.muda_posicao_circulo(int(args[1]),  int(args[2]), + int(args[3]),  int(args[4]))
+                tabuleiro.desenha_tabuleiro(screen)
+                pygame.display.flip()
+
+
         except:
             pass
         if event.type == pygame.QUIT:  # If user clicked close
@@ -397,28 +493,34 @@ while not done:
                 elif send_message_button_rect.collidepoint(event.pos):
                     print("Minha mensagem: " + input_para_caixa_do_chat)
                     enviar_mensagem(name + ": " + input_para_caixa_do_chat, jogador_atual)
+                position_mouse = pygame.mouse.get_pos()
+                color = screen.get_at(pygame.mouse.get_pos())
+                x_da_peca = position_mouse[0]
+                y_da_peca = position_mouse[1]
                 if len(circulos) < 2:
-                    position_mouse = pygame.mouse.get_pos()
-                    color = screen.get_at(pygame.mouse.get_pos())
-                    x_desejada = position_mouse[0]
-                    y_desejado = position_mouse[1]
-                    circulo = tabuleiro.verifica_se_e_bola(x_desejada, y_desejado)
+                    circulo = tabuleiro.verifica_se_e_bola(x_da_peca, y_da_peca)
                     if len(circulos) == 0 and circulo is not None:
                         circulos.append(circulo)
-                        print(circulos[0].get_x_y())
+                        # print(circulos[0].get_x_y())
+                        # print('Como era pra ta:' + str(circulos[0]))
+
                     elif len(circulos) == 1 and (
                             (circulos[0].get_cor() == amarelo or circulos[
                                 0].get_cor() == vermelho) and color == branco):
                         x_desejada = position_mouse[0]
                         y_desejado = position_mouse[1]
-                        muda_posicao_circulo(circulos[0], x_desejada, y_desejado)
+                        x_da_peca, y_da_peca = circulos[0].get_x_y()
+
+                        #muda_posicao_circulo(circulos[0], x_desejada, y_desejado)
+                        print("x_da_peca: " + str(x_da_peca), "y_dapeca: " + str(y_da_peca), "xdesejado: " + str(x_desejada), "ydesejado:" + str(y_desejado))
+                        tabuleiro.muda_posicao_circulo(x_da_peca, y_da_peca, x_desejada, y_desejado)
                         tabuleiro.verifica_se_peca_foi_comida(circulos[0])
                         circulos = []
                     elif len(circulos) == 1 and (
                             (circulos[0].get_cor() == preto or circulos[0].get_cor() == roxo) and color == verde):
                         x_desejada = position_mouse[0]
                         y_desejado = position_mouse[1]
-                        muda_posicao_circulo(circulos[0], x_desejada, y_desejado)
+                        tabuleiro.muda_posicao_circulo(x_da_peca, y_da_peca, x_desejada, y_desejado)
                         tabuleiro.verifica_se_peca_foi_comida(circulos[0])
                         circulos = []
                     else:
