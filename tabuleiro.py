@@ -512,7 +512,7 @@ while not done:
                         x_da_peca, y_da_peca = circulos[0].get_x_y()
 
                         #muda_posicao_circulo(circulos[0], x_desejada, y_desejado)
-                        print("x_da_peca: " + str(x_da_peca), "y_dapeca: " + str(y_da_peca), "xdesejado: " + str(x_desejada), "ydesejado:" + str(y_desejado))
+                        #print("x_da_peca: " + str(x_da_peca), "y_dapeca: " + str(y_da_peca), "xdesejado: " + str(x_desejada), "ydesejado:" + str(y_desejado))
                         tabuleiro.muda_posicao_circulo(x_da_peca, y_da_peca, x_desejada, y_desejado)
                         tabuleiro.verifica_se_peca_foi_comida(circulos[0])
                         circulos = []
@@ -520,6 +520,7 @@ while not done:
                             (circulos[0].get_cor() == preto or circulos[0].get_cor() == roxo) and color == verde):
                         x_desejada = position_mouse[0]
                         y_desejado = position_mouse[1]
+                        x_da_peca, y_da_peca = circulos[0].get_x_y()
                         tabuleiro.muda_posicao_circulo(x_da_peca, y_da_peca, x_desejada, y_desejado)
                         tabuleiro.verifica_se_peca_foi_comida(circulos[0])
                         circulos = []
