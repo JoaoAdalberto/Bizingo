@@ -49,7 +49,7 @@ client_socket.connect((HOST, PORT))
 client_socket.setblocking(False)
 
 name = input("Digite o seu nome:")
-#name = "Pedroo"
+# name = "Pedroo"
 send(name, client_socket)
 
 preto = (0, 0, 0, 255)
@@ -107,57 +107,6 @@ def enviar_mensagem(input, jogador_atual):
     caixa_chat.adiciona_texto(jogador_atual, input)
     caixa_chat.atualiza_tela_chatarray(jogador_atual)
     send("CHAT " + input, client_socket)
-
-
-# def muda_posicao_circulo(circulo, x_desejada, y_desejado):
-#     a, b = circulo.get_x_y()
-#     cor = circulo.get_cor()
-#     eh_preto_ou_roxo = (cor == preto) or (cor == roxo)
-#     eh_amarelo_ou_vermelho = (cor == amarelo) or (cor == vermelho)
-#     if eh_preto_ou_roxo:
-#         preto_ou_roxo_quer_ir_para_direita = (a + 45 > x_desejada > a + 15 and b - 28 < y_desejado < b + 10)
-#         preto_ou_roxo_quer_ir_para_esquerda = (a - 15 > x_desejada > a - 45 and b - 28 < y_desejado < b + 10)
-#         preto_ou_roxo_quer_ir_para_diagonal_direita_cima = (a + 30 > x_desejada > a and b - 28 > y_desejado > b - 66)
-#         preto_ou_roxo_quer_ir_para_diagonal_direita_baixo = (a + 30 > x_desejada > a and b + 10 < y_desejado < b + 48)
-#         preto_ou_roxo_quer_ir_para_diagonal_esquerda_cima = (a - 30 < x_desejada < a and b - 28 > y_desejado > b - 66)
-#         preto_ou_roxo_quer_ir_para_diagonal_esquerda_baixo = (a - 30 < x_desejada < a and b + 10 < y_desejado < b + 48)
-#         if preto_ou_roxo_quer_ir_para_direita:
-#             circulo.set_x_y((a + 30, b))
-#         elif preto_ou_roxo_quer_ir_para_esquerda:
-#             circulo.set_x_y((a - 30, b))
-#         elif preto_ou_roxo_quer_ir_para_diagonal_direita_cima:
-#             circulo.set_x_y((a + 15, b - 38))
-#         elif preto_ou_roxo_quer_ir_para_diagonal_direita_baixo:
-#             circulo.set_x_y((a + 15, b + 38))
-#         elif preto_ou_roxo_quer_ir_para_diagonal_esquerda_cima:
-#             circulo.set_x_y((a - 15, b - 38))
-#         elif preto_ou_roxo_quer_ir_para_diagonal_esquerda_baixo:
-#             circulo.set_x_y((a - 15, b + 38))
-#     elif eh_amarelo_ou_vermelho:
-#         amarelo_ou_vermelho_quer_ir_para_direita = (a + 45 > x_desejada > a + 15 and b - 25 < y_desejado < b + 13)
-#         amarelo_ou_vermelho_quer_ir_para_esquerda = (a - 15 > x_desejada > a - 45 and b - 25 < y_desejado < b + 13)
-#         amarelo_ou_vermelho_quer_ir_para_diagonal_direita_cima = (
-#                 a + 30 > x_desejada > a and b - 13 > y_desejado > b - 50)
-#         amarelo_ou_vermelho_quer_ir_para_diagonal_direita_baixo = (
-#                 a + 30 > x_desejada > a and b + 25 < y_desejado < b + 62)
-#         amarelo_ou_vermelho__quer_ir_para_diagonal_esquerda_cima = (
-#                 a - 30 < x_desejada < a and b - 13 > y_desejado > b - 50)
-#         amarelo_ou_vermelho__quer_ir_para_diagonal_esquerda_baixo = (
-#                 a - 30 < x_desejada < a and b + 25 < y_desejado < b + 62)
-#         if amarelo_ou_vermelho_quer_ir_para_direita:
-#             circulo.set_x_y((a + 30, b))
-#         elif amarelo_ou_vermelho_quer_ir_para_esquerda:
-#             circulo.set_x_y((a - 30, b))
-#         elif amarelo_ou_vermelho_quer_ir_para_diagonal_direita_cima:
-#             circulo.set_x_y((a + 15, b - 38))
-#         elif amarelo_ou_vermelho_quer_ir_para_diagonal_direita_baixo:
-#             circulo.set_x_y((a + 15, b + 38))
-#         elif amarelo_ou_vermelho__quer_ir_para_diagonal_esquerda_cima:
-#             circulo.set_x_y((a - 15, b - 38))
-#         elif amarelo_ou_vermelho__quer_ir_para_diagonal_esquerda_baixo:
-#             circulo.set_x_y((a - 15, b + 38))
-#     tabuleiro.desenha_tabuleiro(screen)
-#     pygame.display.flip()
 
 
 def acao(message):
@@ -276,6 +225,23 @@ class Tabuleiro():
                                Bola(vermelho, 295, 414), Bola(vermelho, 325, 414)
 
                                ])
+        self.bolas_consulta = np.array([Bola(preto, 235, 165), Bola(preto, 265, 165), Bola(preto, 295, 165),  # 1 linha
+                                        Bola(preto, 220, 203), Bola(preto, 250, 203), Bola(preto, 280, 203),
+                                        Bola(preto, 310, 203),  # 2linha
+                                        Bola(preto, 205, 241), Bola(preto, 235, 241), Bola(preto, 265, 241),
+                                        Bola(preto, 295, 241), Bola(preto, 325, 241),  # 3 linha
+                                        Bola(preto, 190, 279), Bola(roxo, 220, 279), Bola(preto, 250, 279),
+                                        Bola(preto, 280, 279), Bola(roxo, 310, 279), Bola(preto, 340, 279),  # 4 linha
+                                        Bola(vermelho, 175, 338), Bola(amarelo, 205, 338), Bola(vermelho, 235, 338),
+                                        Bola(vermelho, 265, 338), Bola(vermelho, 295, 338), Bola(amarelo, 325, 338),
+                                        Bola(vermelho, 355, 338),  # 5 linha
+                                        Bola(vermelho, 190, 376), Bola(vermelho, 220, 376), Bola(vermelho, 250, 376),
+                                        Bola(vermelho, 280, 376), Bola(vermelho, 310, 376), Bola(vermelho, 340, 376),
+                                        # 6 linha
+                                        Bola(vermelho, 205, 414), Bola(vermelho, 235, 414), Bola(vermelho, 265, 414),
+                                        Bola(vermelho, 295, 414), Bola(vermelho, 325, 414)
+
+                                        ])
 
     def desenha_tabuleiro(self, screen):
         for triangulo in self.triangulos:
@@ -290,127 +256,32 @@ class Tabuleiro():
             if verifica_dentro_do_circulo(x, y, a, b, 7):
                 return circolo
 
-    def verifica_se_peca_foi_comida(self, circulo):
-        x, y = circulo.get_x_y()
-        count = 0
-        cor = circulo.get_cor()
-        # print(cor)
-        eh_preto_ou_roxo = (cor == preto) or (cor == roxo)
-        eh_amarelo_ou_vermelho = (cor == amarelo) or (cor == vermelho)
-        # print(eh_amarelo_ou_vermelho)
-        if eh_preto_ou_roxo:
-            for circolo in self.bolas:
-                (a, b) = circolo.get_x_y()
-                verifica_se_ta_em_cima_direita = (a == x + 15) and (b == y - 38)
-                verifica_se_ta_em_baixo_direita = (a == x + 15) and (b == y + 38)
-                verifica_se_ta_em_baixo_esquerda = (a == x - 15) and (b == y + 38)
-                verifica_se_ta_do_lado_direito = (a == x + 30) and (b == y)
-                verifica_se_ta_do_lado_esquerdo = (a == x - 30) and (b == y)
-                if verifica_se_ta_do_lado_esquerdo:
-                    for circolo_do_lado_esquerdo in self.bolas:
-                        (a, b) = circolo_do_lado_esquerdo.get_x_y()
-                        verifica_se_ta_em_cima_esquerda = (a == x - 15) and (b == y - 38)
-                        if verifica_se_ta_em_cima_esquerda:
-                            for circolo_dentro_do_triangulo in self.bolas:
-                                (a, b) = circolo_dentro_do_triangulo.get_x_y()
-                                verifica_se_ta_dentro_pela_esquerda = (a == x - 15) and (b == y - 17)
-                                if verifica_se_ta_dentro_pela_esquerda:
-                                    circolo_dentro_do_triangulo.set_x_y((0, 0))
-                                    circolo_dentro_do_triangulo.set_cor(cinza)
-                elif verifica_se_ta_do_lado_direito:
-                    for circolo_do_lado_direito in self.bolas:
-                        (a, b) = circolo_do_lado_direito.get_x_y()
-                        verifica_se_tem_em_cima_direito = (a == x + 15) and (b == y - 38)
-                        if verifica_se_tem_em_cima_direito:
-                            for circulo_dentro_do_triangulo in self.bolas:
-                                (a, b) = circulo_dentro_do_triangulo.get_x_y()
-                                verifica_se_ta_dentro_pela_direita = (a == x + 15) and (b == y - 17)
-                                if verifica_se_ta_dentro_pela_direita:
-                                    circulo_dentro_do_triangulo.set_x_y((0, 0))
-                                    circulo_dentro_do_triangulo.set_cor(cinza)
-                elif verifica_se_ta_em_baixo_direita:
-                    for circolo_do_lado_esqurdo in self.bolas:
-                        (a, b) = circolo_do_lado_esqurdo.get_x_y()
-                        verifica_se_tem_do_lado_esquerdo_em_baixo = (a == x - 15) and (b == y + 38)
-                        if verifica_se_tem_do_lado_esquerdo_em_baixo:
-                            for circulo_dentro_do_triangolo in self.bolas:
-                                (a, b) = circulo_dentro_do_triangolo.get_x_y()
-                                verifica_se_ta_dentro_pela_direita = (a == x) and (b == y + 21)
-                                if verifica_se_ta_dentro_pela_direita:
-                                    circulo_dentro_do_triangolo.set_x_y((0, 0))
-                                    circulo_dentro_do_triangolo.set_cor(cinza)
-        elif eh_amarelo_ou_vermelho:
-            # print("entrei aqui")
-            for circolo in self.bolas:
-                (a, b) = circolo.get_x_y()
-                verifica_se_ta_em_cima_esquerda = (a == x - 15) and (b == y - 38)
-                verifica_se_ta_em_cima_direita = (a == x + 15) and (b == y - 38)
-                verifica_se_ta_em_baixo_direita = (a == x + 15) and (b == y + 38)
-                verifica_se_ta_em_baixo_esquerda = (a == x - 15) and (b == y + 38)
-                verifica_se_ta_do_lado_direito = (a == x + 30) and (b == y)
-                verifica_se_ta_do_lado_esquerdo = (a == x - 30) and (b == y)
-                if verifica_se_ta_do_lado_esquerdo:
-                    # print("entrei aqui2")
-                    for circolo_do_lado_esquerdo in self.bolas:
-                        (a, b) = circolo_do_lado_esquerdo.get_x_y()
-                        verifica_se_ta_em_baixo_esquerda = (a == x - 15) and (b == y + 38)
-                        if verifica_se_ta_em_baixo_esquerda:
-                            # print("entrei aqui3")
-                            for circolo_dentro_do_triangulo in self.bolas:
-                                (a, b) = circolo_dentro_do_triangulo.get_x_y()
-                                verifica_se_ta_dentro_pela_esquerda = (a == x - 15) and (b == y + 17)
-                                if verifica_se_ta_dentro_pela_esquerda:
-                                    # print("entrei aqui 4")
-                                    circolo_dentro_do_triangulo.set_x_y((0, 0))
-                                    circolo_dentro_do_triangulo.set_cor(cinza)
-                elif verifica_se_ta_do_lado_direito:
-                    for circolo_do_lado_direito in self.bolas:
-                        (a, b) = circolo_do_lado_direito.get_x_y()
-                        verifica_se_tem_em_baixo_direito = (a == x + 15) and (b == y + 38)
-                        if verifica_se_tem_em_baixo_direito:
-                            for circulo_dentro_do_triangulo in self.bolas:
-                                (a, b) = circulo_dentro_do_triangulo.get_x_y()
-                                verifica_se_ta_dentro_pela_direita = (a == x - 15) and (b == y + 17)
-                                if verifica_se_ta_dentro_pela_direita:
-                                    circulo_dentro_do_triangulo.set_x_y((0, 0))
-                                    circulo_dentro_do_triangulo.set_cor(cinza)
-                elif verifica_se_ta_em_cima_direita:
-                    for circolo_do_lado_esqurdo in self.bolas:
-                        (a, b) = circolo_do_lado_esqurdo.get_x_y()
-                        verifica_se_tem_do_lado_esquerdo_em_cima = (a == x - 15) and (b == y - 38)
-                        if verifica_se_tem_do_lado_esquerdo_em_cima:
-                            for circulo_dentro_do_triangolo in self.bolas:
-                                (a, b) = circulo_dentro_do_triangolo.get_x_y()
-                                verifica_se_ta_dentro_pela_direita = (a == x) and (b == y - 21)
-                                if verifica_se_ta_dentro_pela_direita:
-                                    circulo_dentro_do_triangolo.set_x_y((0, 0))
-                                    circulo_dentro_do_triangolo.set_cor(cinza)
-        tabuleiro.desenha_tabuleiro(screen)
-        pygame.display.flip()
-
-    def muda_posicao_circulo(self, x_atual, y_atual,  x_desejada, y_desejado):
+    def muda_posicao_circulo(self, x_atual, y_atual, x_desejada, y_desejado):
         global circulo, a, b
-        #print("entrei aqui1")
+        # print("entrei aqui1")
         for teste in self.bolas:
-            #print("entrei aqui2")
+            # print("entrei aqui2")
             (a, b) = teste.get_x_y()
             if verifica_dentro_do_circulo(x_atual, y_atual, a, b, 7):
+                # print("entrei aqui ")
                 circulo = teste
                 if circulo is not None:
                     cor = circulo.get_cor()
                     eh_preto_ou_roxo = (cor == preto) or (cor == roxo)
                     eh_amarelo_ou_vermelho = (cor == amarelo) or (cor == vermelho)
                     if eh_preto_ou_roxo:
-                        preto_ou_roxo_quer_ir_para_direita = (a + 45 > x_desejada > a + 15 and b - 28 < y_desejado < b + 10)
-                        preto_ou_roxo_quer_ir_para_esquerda = (a - 15 > x_desejada > a - 45 and b - 28 < y_desejado < b + 10)
+                        preto_ou_roxo_quer_ir_para_direita = (
+                                a + 45 > x_desejada > a + 15 and b - 28 < y_desejado < b + 10)
+                        preto_ou_roxo_quer_ir_para_esquerda = (
+                                a - 15 > x_desejada > a - 45 and b - 28 < y_desejado < b + 10)
                         preto_ou_roxo_quer_ir_para_diagonal_direita_cima = (
-                                    a + 30 > x_desejada > a and b - 28 > y_desejado > b - 66)
+                                a + 30 > x_desejada > a and b - 28 > y_desejado > b - 66)
                         preto_ou_roxo_quer_ir_para_diagonal_direita_baixo = (
-                                    a + 30 > x_desejada > a and b + 10 < y_desejado < b + 48)
+                                a + 30 > x_desejada > a and b + 10 < y_desejado < b + 48)
                         preto_ou_roxo_quer_ir_para_diagonal_esquerda_cima = (
-                                    a - 30 < x_desejada < a and b - 28 > y_desejado > b - 66)
+                                a - 30 < x_desejada < a and b - 28 > y_desejado > b - 66)
                         preto_ou_roxo_quer_ir_para_diagonal_esquerda_baixo = (
-                                    a - 30 < x_desejada < a and b + 10 < y_desejado < b + 48)
+                                a - 30 < x_desejada < a and b + 10 < y_desejado < b + 48)
                         if preto_ou_roxo_quer_ir_para_direita:
                             circulo.set_x_y((a + 30, b))
                         elif preto_ou_roxo_quer_ir_para_esquerda:
@@ -424,8 +295,10 @@ class Tabuleiro():
                         elif preto_ou_roxo_quer_ir_para_diagonal_esquerda_baixo:
                             circulo.set_x_y((a - 15, b + 38))
                     elif eh_amarelo_ou_vermelho:
-                        amarelo_ou_vermelho_quer_ir_para_direita = (a + 45 > x_desejada > a + 15 and b - 25 < y_desejado < b + 13)
-                        amarelo_ou_vermelho_quer_ir_para_esquerda = (a - 15 > x_desejada > a - 45 and b - 25 < y_desejado < b + 13)
+                        amarelo_ou_vermelho_quer_ir_para_direita = (
+                                a + 45 > x_desejada > a + 15 and b - 25 < y_desejado < b + 13)
+                        amarelo_ou_vermelho_quer_ir_para_esquerda = (
+                                a - 15 > x_desejada > a - 45 and b - 25 < y_desejado < b + 13)
                         amarelo_ou_vermelho_quer_ir_para_diagonal_direita_cima = (
                                 a + 30 > x_desejada > a and b - 13 > y_desejado > b - 50)
                         amarelo_ou_vermelho_quer_ir_para_diagonal_direita_baixo = (
@@ -448,9 +321,209 @@ class Tabuleiro():
                             circulo.set_x_y((a - 15, b + 38))
                     tabuleiro.desenha_tabuleiro(screen)
                     pygame.display.flip()
-                    send("MOVE " + str(x_atual) + " " + str(y_atual) + " " + str(x_desejada) + " " +str(y_desejado),
+                    send("MOVE " + str(x_atual) + " " + str(y_atual) + " " + str(x_desejada) + " " + str(y_desejado),
                          client_socket)
 
+    def verifica_se_peca_foi_comida(self, x_agr, y_agr):
+        for bola in self.bolas:
+            (i, k) = bola.get_x_y()
+            print(i, k)
+            print(verifica_dentro_do_circulo(x_agr, y_agr, i, k, 7))
+            if verifica_dentro_do_circulo(x_agr, y_agr, i, k, 7):
+                bolab = bola
+                if bolab is not None:
+                    x, y = bolab.get_x_y()
+                    cor = bolab.get_cor()
+                    eh_preto_ou_roxo = (cor == preto) or (cor == roxo)
+                    eh_amarelo_ou_vermelho = (cor == amarelo) or (cor == vermelho)
+                    if eh_preto_ou_roxo:
+                        for circolo in self.bolas:
+                            (a, b) = circolo.get_x_y()
+                            verifica_se_ta_em_cima_direita = (a == x + 15) and (b == y - 38)
+                            verifica_se_ta_em_baixo_direita = (a == x + 15) and (b == y + 38)
+                            verifica_se_ta_em_baixo_esquerda = (a == x - 15) and (b == y + 38)
+                            verifica_se_ta_do_lado_direito = (a == x + 30) and (b == y)
+                            verifica_se_ta_do_lado_esquerdo = (a == x - 30) and (b == y)
+                            if verifica_se_ta_do_lado_esquerdo:
+                                for circolo_do_lado_esquerdo in self.bolas:
+                                    (a, b) = circolo_do_lado_esquerdo.get_x_y()
+                                    verifica_se_ta_em_cima_esquerda = (a == x - 15) and (b == y - 38)
+                                    if verifica_se_ta_em_cima_esquerda:
+                                        for circolo_dentro_do_triangulo in self.bolas:
+                                            (a, b) = circolo_dentro_do_triangulo.get_x_y()
+                                            verifica_se_ta_dentro_pela_esquerda = (a == x - 15) and (b == y - 17)
+                                            if verifica_se_ta_dentro_pela_esquerda:
+                                                circolo_dentro_do_triangulo.set_x_y((0, 0))
+                                                circolo_dentro_do_triangulo.set_cor(cinza)
+                            elif verifica_se_ta_do_lado_direito:
+                                for circolo_do_lado_direito in self.bolas:
+                                    (a, b) = circolo_do_lado_direito.get_x_y()
+                                    verifica_se_tem_em_cima_direito = (a == x + 15) and (b == y - 38)
+                                    if verifica_se_tem_em_cima_direito:
+                                        for circulo_dentro_do_triangulo in self.bolas:
+                                            (a, b) = circulo_dentro_do_triangulo.get_x_y()
+                                            verifica_se_ta_dentro_pela_direita = (a == x + 15) and (b == y - 17)
+                                            if verifica_se_ta_dentro_pela_direita:
+                                                circulo_dentro_do_triangulo.set_x_y((0, 0))
+                                                circulo_dentro_do_triangulo.set_cor(cinza)
+                            elif verifica_se_ta_em_baixo_direita:
+                                for circolo_do_lado_esqurdo in self.bolas:
+                                    (a, b) = circolo_do_lado_esqurdo.get_x_y()
+                                    verifica_se_tem_do_lado_esquerdo_em_baixo = (a == x - 15) and (b == y + 38)
+                                    if verifica_se_tem_do_lado_esquerdo_em_baixo:
+                                        for circulo_dentro_do_triangolo in self.bolas:
+                                            (a, b) = circulo_dentro_do_triangolo.get_x_y()
+                                            verifica_se_ta_dentro_pela_direita = (a == x) and (b == y + 21)
+                                            if verifica_se_ta_dentro_pela_direita:
+                                                circulo_dentro_do_triangolo.set_x_y((0, 0))
+                                                circulo_dentro_do_triangolo.set_cor(cinza)
+                    elif eh_amarelo_ou_vermelho:
+                        print("entrei aqui")
+                        for circolo in self.bolas:
+                            (a, b) = circolo.get_x_y()
+                            verifica_se_ta_em_cima_esquerda = (a == x - 15) and (b == y - 38)
+                            verifica_se_ta_em_cima_direita = (a == x + 15) and (b == y - 38)
+                            verifica_se_ta_em_baixo_direita = (a == x + 15) and (b == y + 38)
+                            verifica_se_ta_em_baixo_esquerda = (a == x - 15) and (b == y + 38)
+                            verifica_se_ta_do_lado_direito = (a == x + 30) and (b == y)
+                            verifica_se_ta_do_lado_esquerdo = (a == x - 30) and (b == y)
+                            if verifica_se_ta_do_lado_esquerdo:
+                                print("entrei aqui2")
+                                for circolo_do_lado_esquerdo in self.bolas:
+                                    (a, b) = circolo_do_lado_esquerdo.get_x_y()
+                                    verifica_se_ta_em_baixo_esquerda = (a == x - 15) and (b == y + 38)
+                                    if verifica_se_ta_em_baixo_esquerda:
+                                        print("entrei aqui3")
+                                        for circolo_dentro_do_triangulo in self.bolas:
+                                            (a, b) = circolo_dentro_do_triangulo.get_x_y()
+                                            verifica_se_ta_dentro_pela_esquerda = (a == x - 15) and (b == y + 17)
+                                            if verifica_se_ta_dentro_pela_esquerda:
+                                                print("entrei aqui 4")
+                                                circolo_dentro_do_triangulo.set_x_y((0, 0))
+                                                circolo_dentro_do_triangulo.set_cor(cinza)
+                            elif verifica_se_ta_do_lado_direito:
+                                for circolo_do_lado_direito in self.bolas:
+                                    (a, b) = circolo_do_lado_direito.get_x_y()
+                                    verifica_se_tem_em_baixo_direito = (a == x + 15) and (b == y + 38)
+                                    if verifica_se_tem_em_baixo_direito:
+                                        for circulo_dentro_do_triangulo in self.bolas:
+                                            (a, b) = circulo_dentro_do_triangulo.get_x_y()
+                                            verifica_se_ta_dentro_pela_direita = (a == x - 15) and (b == y + 17)
+                                            if verifica_se_ta_dentro_pela_direita:
+                                                circulo_dentro_do_triangulo.set_x_y((0, 0))
+                                                circulo_dentro_do_triangulo.set_cor(cinza)
+                            elif verifica_se_ta_em_cima_direita:
+                                for circolo_do_lado_esqurdo in self.bolas:
+                                    (a, b) = circolo_do_lado_esqurdo.get_x_y()
+                                    verifica_se_tem_do_lado_esquerdo_em_cima = (a == x - 15) and (b == y - 38)
+                                    if verifica_se_tem_do_lado_esquerdo_em_cima:
+                                        for circulo_dentro_do_triangolo in self.bolas:
+                                            (a, b) = circulo_dentro_do_triangolo.get_x_y()
+                                            verifica_se_ta_dentro_pela_direita = (a == x) and (b == y - 21)
+                                            if verifica_se_ta_dentro_pela_direita:
+                                                circulo_dentro_do_triangolo.set_x_y((0, 0))
+                                                circulo_dentro_do_triangolo.set_cor(cinza)
+                    tabuleiro.desenha_tabuleiro(screen)
+                    pygame.display.flip()
+
+    # def verifica_se_peca_foi_comida(self, x_atual, y_atual):
+    #     global circulo, a, b
+    #     # print("entrei aqui1")
+    #     for teste in self.bolas:
+    #         # print("entrei aqui2")
+    #         (a, b) = teste.get_x_y()
+    #         print(a, b)
+    #         print(verifica_dentro_do_circulo(x_atual, y_atual, a, b, 7))
+    #         if verifica_dentro_do_circulo(x_atual, y_atual, a, b, 7):
+    #             # print("entrei aqui ")
+    #             circulo = teste
+    #             if circulo is not None:
+    #                 print("oii")
+    #                 x, y = circulo.get_x_y()
+    #                 cor = circulo.get_cor()
+    #                 eh_preto_ou_roxo = (cor == preto) or (cor == roxo)
+    #                 eh_amarelo_ou_vermelho = (cor == amarelo) or (cor == vermelho)
+    #                 if eh_preto_ou_roxo:
+    #                     for circolo in self.bolas:
+    #                         (a, b) = circolo.get_x_y()
+    #                         verifica_se_ta_em_baixo_direita = (a == x + 15) and (b == y + 38)
+    #                         verifica_se_ta_do_lado_direito = (a == x + 30) and (b == y)
+    #                         verifica_se_ta_do_lado_esquerdo = (a == x - 30) and (b == y)
+    #                         if verifica_se_ta_do_lado_esquerdo:
+    #                             for circolo_do_lado_esquerdo in self.bolas:
+    #                                 (a, b) = circolo_do_lado_esquerdo.get_x_y()
+    #                                 verifica_se_ta_em_cima_esquerda = (a == x - 15) and (b == y - 38)
+    #                                 if verifica_se_ta_em_cima_esquerda:
+    #                                     for circolo_dentro_do_triangulo in self.bolas:
+    #                                         (a, b) = circolo_dentro_do_triangulo.get_x_y()
+    #                                         verifica_se_ta_dentro_pela_esquerda = (a == x - 15) and (b == y - 17)
+    #                                         if verifica_se_ta_dentro_pela_esquerda:
+    #                                             circolo_dentro_do_triangulo.set_x_y((0, 0))
+    #                                             circolo_dentro_do_triangulo.set_cor(cinza)
+    #                         elif verifica_se_ta_do_lado_direito:
+    #                             for circolo_do_lado_direito in self.bolas:
+    #                                 (a, b) = circolo_do_lado_direito.get_x_y()
+    #                                 verifica_se_tem_em_cima_direito = (a == x + 15) and (b == y - 38)
+    #                                 if verifica_se_tem_em_cima_direito:
+    #                                     for circulo_dentro_do_triangulo in self.bolas:
+    #                                         (a, b) = circulo_dentro_do_triangulo.get_x_y()
+    #                                         verifica_se_ta_dentro_pela_direita = (a == x + 15) and (b == y - 17)
+    #                                         if verifica_se_ta_dentro_pela_direita:
+    #                                             circulo_dentro_do_triangulo.set_x_y((0, 0))
+    #                                             circulo_dentro_do_triangulo.set_cor(cinza)
+    #                         elif verifica_se_ta_em_baixo_direita:
+    #                             for circolo_do_lado_esqurdo in self.bolas:
+    #                                 (a, b) = circolo_do_lado_esqurdo.get_x_y()
+    #                                 verifica_se_tem_do_lado_esquerdo_em_baixo = (a == x - 15) and (b == y + 38)
+    #                                 if verifica_se_tem_do_lado_esquerdo_em_baixo:
+    #                                     for circulo_dentro_do_triangolo in self.bolas:
+    #                                         (a, b) = circulo_dentro_do_triangolo.get_x_y()
+    #                                         verifica_se_ta_dentro_pela_direita = (a == x) and (b == y + 21)
+    #                                         if verifica_se_ta_dentro_pela_direita:
+    #                                             circulo_dentro_do_triangolo.set_x_y((0, 0))
+    #                                             circulo_dentro_do_triangolo.set_cor(cinza)
+    #                 elif eh_amarelo_ou_vermelho:
+    #                     # print("entrei aqui")
+    #                     for circolo in self.bolas:
+    #                         (a, b) = circolo.get_x_y()
+    #                         verifica_se_ta_em_cima_direita = (a == x + 15) and (b == y - 38)
+    #                         verifica_se_ta_do_lado_direito = (a == x + 30) and (b == y)
+    #                         verifica_se_ta_do_lado_esquerdo = (a == x - 30) and (b == y)
+    #                         if verifica_se_ta_do_lado_esquerdo:
+    #                             for circolo_do_lado_esquerdo in self.bolas:
+    #                                 (a, b) = circolo_do_lado_esquerdo.get_x_y()
+    #                                 verifica_se_ta_em_baixo_esquerda = (a == x - 15) and (b == y + 38)
+    #                                 if verifica_se_ta_em_baixo_esquerda:
+    #                                     for circolo_dentro_do_triangulo in self.bolas:
+    #                                         (a, b) = circolo_dentro_do_triangulo.get_x_y()
+    #                                         verifica_se_ta_dentro_pela_esquerda = (a == x - 15) and (b == y + 17)
+    #                                         if verifica_se_ta_dentro_pela_esquerda:
+    #                                             circolo_dentro_do_triangulo.set_x_y((0, 0))
+    #                                             circolo_dentro_do_triangulo.set_cor(cinza)
+    #                         elif verifica_se_ta_do_lado_direito:
+    #                             for circolo_do_lado_direito in self.bolas:
+    #                                 (a, b) = circolo_do_lado_direito.get_x_y()
+    #                                 verifica_se_tem_em_baixo_direito = (a == x + 15) and (b == y + 38)
+    #                                 if verifica_se_tem_em_baixo_direito:
+    #                                     for circulo_dentro_do_triangulo in self.bolas:
+    #                                         (a, b) = circulo_dentro_do_triangulo.get_x_y()
+    #                                         verifica_se_ta_dentro_pela_direita = (a == x - 15) and (b == y + 17)
+    #                                         if verifica_se_ta_dentro_pela_direita:
+    #                                             circulo_dentro_do_triangulo.set_x_y((0, 0))
+    #                                             circulo_dentro_do_triangulo.set_cor(cinza)
+    #                         elif verifica_se_ta_em_cima_direita:
+    #                             for circolo_do_lado_esqurdo in self.bolas:
+    #                                 (a, b) = circolo_do_lado_esqurdo.get_x_y()
+    #                                 verifica_se_tem_do_lado_esquerdo_em_cima = (a == x - 15) and (b == y - 38)
+    #                                 if verifica_se_tem_do_lado_esquerdo_em_cima:
+    #                                     for circulo_dentro_do_triangolo in self.bolas:
+    #                                         (a, b) = circulo_dentro_do_triangolo.get_x_y()
+    #                                         verifica_se_ta_dentro_pela_direita = (a == x) and (b == y - 21)
+    #                                         if verifica_se_ta_dentro_pela_direita:
+    #                                             circulo_dentro_do_triangolo.set_x_y((0, 0))
+    #                                             circulo_dentro_do_triangolo.set_cor(cinza)
+    #                 tabuleiro.desenha_tabuleiro(screen)
+    #                 pygame.display.flip()
 
 
 jogador_atual = "verde"
@@ -470,12 +543,8 @@ while not done:
                 caixa_chat.atualiza_tela_chatarray(jogador_atual)
             elif acao(mensagem) == "MOVE":
                 args = mensagem.split()
-                # print("args 1: " + args[1])
-                # print("args 2: " + args[2])
-                # print("args 3: " + args[3])
-                # print("args 4: " + args[4])
-                # print(175 == int(args[1]))
-                tabuleiro.muda_posicao_circulo(int(args[1]),  int(args[2]), + int(args[3]),  int(args[4]))
+                tabuleiro.muda_posicao_circulo(int(args[1]), int(args[2]), + int(args[3]), int(args[4]))
+                tabuleiro.verifica_se_peca_foi_comida(int(args[3]), int(args[4]))
                 tabuleiro.desenha_tabuleiro(screen)
                 pygame.display.flip()
 
@@ -511,18 +580,22 @@ while not done:
                         y_desejado = position_mouse[1]
                         x_da_peca, y_da_peca = circulos[0].get_x_y()
 
-                        #muda_posicao_circulo(circulos[0], x_desejada, y_desejado)
-                        #print("x_da_peca: " + str(x_da_peca), "y_dapeca: " + str(y_da_peca), "xdesejado: " + str(x_desejada), "ydesejado:" + str(y_desejado))
+                        # muda_posicao_circulo(circulos[0], x_desejada, y_desejado)
+                        # print("x_da_peca: " + str(x_da_peca), "y_dapeca: " + str(y_da_peca), "xdesejado: " + str(x_desejada), "ydesejado:" + str(y_desejado))
+                        print(x_da_peca, y_da_peca)
                         tabuleiro.muda_posicao_circulo(x_da_peca, y_da_peca, x_desejada, y_desejado)
-                        tabuleiro.verifica_se_peca_foi_comida(circulos[0])
+                        # tabuleiro.verifica_se_peca_foi_comida(x_da_peca, y_da_peca)
+                        tabuleiro.verifica_se_peca_foi_comida(x_desejada, y_desejado)
                         circulos = []
                     elif len(circulos) == 1 and (
                             (circulos[0].get_cor() == preto or circulos[0].get_cor() == roxo) and color == verde):
                         x_desejada = position_mouse[0]
                         y_desejado = position_mouse[1]
                         x_da_peca, y_da_peca = circulos[0].get_x_y()
+                        print(x_da_peca, y_da_peca)
                         tabuleiro.muda_posicao_circulo(x_da_peca, y_da_peca, x_desejada, y_desejado)
-                        tabuleiro.verifica_se_peca_foi_comida(circulos[0])
+                        # tabuleiro.verifica_se_peca_foi_comida(x_da_peca, y_da_peca)
+                        tabuleiro.verifica_se_peca_foi_comida(x_desejada, y_desejado)
                         circulos = []
                     else:
                         circulos = []
