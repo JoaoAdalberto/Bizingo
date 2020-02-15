@@ -28,3 +28,8 @@ class Botao():
         playSurface.blit(render_font, (posicao_fonte_x, posicao_fonte_y))
         pygame.display.flip()
         return rect
+
+    def deleta(self, playSurface):
+        self.cor = cinza
+        self.desenha_botao(playSurface, 0, 0, 0, 0)
+        pygame.display.flip()

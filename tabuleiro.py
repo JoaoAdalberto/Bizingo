@@ -58,28 +58,6 @@ branco = (255, 255, 255, 255)
 brancola = (255, 255, 254, 255)
 cinza = (128, 128, 128, 255)
 azul = (0, 0, 255, 255)
-MOUSE_LEFT = 1
-MOUSE_RIGHT = 3
-pygame.init()
-size = [1200, 800]
-screen = pygame.display.set_mode(size)
-pygame.display.set_caption("Bizingo")
-circulos = []
-screen.fill(cinza)
-# inicializando o botao de passar turno
-botao_passar_turno = Botao("Passar a vez", (128, 0, 128), roxo)
-botao_passar_turno.desenha_botao(screen, 150, 550, 200, 50)
-# inicializando o botao de enviar mensagens
-send_mensage_button = Botao("Enviar", (255, 1, 127), brancola)
-send_message_button_rect = send_mensage_button.desenha_botao(screen, 920, 490, 200, 50)
-# inicializando o botao de desistir , mas nao ta funcionando ainda
-botao_desistir = Botao("Desistir", (255, 51, 255), azul)
-botao_desistir_rect = botao_desistir.desenha_botao(screen, 150, 650, 200, 50)
-# inicializando a caixa do chat
-caixa_chat = CaixaChat(screen, 500, 80, 600, 350, brancola)
-# inicializando a caixa de entrada de texto
-texto_entrada = TextoEntrada(screen, 500, 460, 400, 110, brancola, "")
-input_para_caixa_do_chat = ""
 
 
 def message_display(x, y, text, size, cor):
@@ -437,15 +415,47 @@ class Tabuleiro():
             ganhador = "vermelho"
             print("O ganhador foi " + ganhador)
             return ganhador
-        elif cor_preto_ou_roxo <= 2:
-            ganhador = "vermelho"
+        elif cor_amarelho_ou_vermelho <= 2:
+            ganhador = "preto"
             print("O ganhador foi " + ganhador)
             return ganhador
-        else:
-            print("ngm ganhou ainda carai")
 
 
-jogador_atual = "preto"
+MOUSE_LEFT = 1
+MOUSE_RIGHT = 3
+pygame.init()
+size = [1200, 800]
+screen = pygame.display.set_mode(size)
+pygame.display.set_caption("Bizingo")
+circulos = []
+screen.fill(cinza)
+minhas_pecas = ""
+# inicializando o botao de passar turno
+botao_passar_turno = Botao("Passar a vez", (128, 0, 128), roxo)
+botao_passar_turno_rect = botao_passar_turno.desenha_botao(screen, 150, 550, 200, 50)
+# inicializando o botao de enviar mensagens
+send_mensage_button = Botao("Enviar", (255, 1, 127), brancola)
+send_message_button_rect = send_mensage_button.desenha_botao(screen, 920, 490, 200, 50)
+# inicializando o botao de desistir , mas nao ta funcionando ainda
+botao_desistir = Botao("Desistir", (255, 51, 255), azul)
+botao_desistir_rect = botao_desistir.desenha_botao(screen, 150, 650, 200, 50)
+botao_cor_vermelho = Botao("", (255, 0, 0), vermelho)
+botao_cor_vermelho_rect = botao_cor_vermelho.desenha_botao(screen, 650, 680, 100, 50)
+botao_cor_preto = Botao("", (0, 0, 0), preto)
+botao_cor_preto_rect = botao_cor_preto.desenha_botao(screen, 850, 680, 100, 50)
+# inicializando a caixa do chat
+caixa_chat = CaixaChat(screen, 500, 80, 600, 350, brancola)
+# inicializando a caixa de entrada de texto
+texto_entrada = TextoEntrada(screen, 500, 460, 400, 110, brancola, "")
+input_para_caixa_do_chat = ""
+message_display(90, 25, "Jogador atual: ", 20, (0, 0, 0, 255))
+message_display(700, 650, "Para começar escolha sua cor: ", 20, (0, 0, 0, 255))
+pygame.draw.circle(screen, vermelho, (175, 25), 15)
+botao_esconde_texto = Botao("", (128, 128, 128), cinza)
+botao_cor_cinza = Botao("", (128, 128, 128), cinza)
+jogador_atual = "jogador"
+vez_de = "vermelho"
+pecas_jogador = ""
 tabuleiro = Tabuleiro()
 tabuleiro.desenha_tabuleiro(screen)
 done = False
@@ -468,8 +478,19 @@ while not done:
                 tabuleiro.verifica_se_tem_ganhador()
                 tabuleiro.desenha_tabuleiro(screen)
                 pygame.display.flip()
-
-
+            elif acao(mensagem) == "VERMELHO":
+                botao_cor_cinza_rect = botao_cor_cinza.desenha_botao(screen, 650, 680, 100, 50)
+            elif acao(mensagem) == "PRETO":
+                botao_cor_cinza_rect = botao_cor_cinza.desenha_botao(screen, 850, 680, 100, 50)
+            elif acao(mensagem) == "TROCA":
+                if vez_de == "vermelho":
+                    vez_de = "preto"
+                    pygame.draw.circle(screen, preto, (175, 25), 15)
+                    pygame.display.flip()
+                elif vez_de == "preto":
+                    vez_de = "vermelho"
+                    pygame.draw.circle(screen, vermelho, (175, 25), 15)
+                    pygame.display.flip()
         except:
             pass
         if event.type == pygame.QUIT:  # If user clicked close
@@ -477,17 +498,59 @@ while not done:
         teste = True
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == MOUSE_LEFT:
-                if texto_entrada.get_input_text_rect().collidepoint(event.pos):
+                if botao_cor_vermelho_rect.collidepoint(event.pos) and minhas_pecas != "preto":
+                    minhas_pecas = "vermelho"
+                    pecas_jogador = "vermelho"
+                    botao_cor_cinza_rect = botao_cor_cinza.desenha_botao(screen, 650, 680, 100, 50)
+                    send(
+                        "VERMELHO ", client_socket)
+                    botao_cor_cinza_rect = botao_cor_cinza.desenha_botao(screen, 850, 680, 100, 50)
+                    pygame.display.flip()
+                    botao_esconde_texto_rect = botao_esconde_texto.desenha_botao(screen, 500, 600, 500, 200)
+                    message_display(150, 750, "JOGADOR VERMELHO ", 20, (255, 0, 0, 255))
+                    tabuleiro.desenha_tabuleiro(screen)
+                    pygame.display.flip()
+                elif botao_cor_preto_rect.collidepoint(event.pos) and minhas_pecas != "vermelho":
+                    minhas_pecas = "preto"
+                    pecas_jogador = "preto"
+                    botao_cor_cinza_rect = botao_cor_cinza.desenha_botao(screen, 850, 680, 100, 50)
+                    send(
+                        "PRETO ", client_socket)
+                    botao_cor_cinza_rect = botao_cor_cinza.desenha_botao(screen, 650, 680, 100, 50)
+                    botao_esconde_texto_rect = botao_esconde_texto.desenha_botao(screen, 500, 600, 500, 200)
+                    tabuleiro.desenha_tabuleiro(screen)
+                    message_display(150, 750, "JOGADOR PRETO ", 20, (0, 0, 0, 255))
+                    pygame.display.flip()
+                elif texto_entrada.get_input_text_rect().collidepoint(event.pos):
                     texto_entrada.handle_event(event)
                 # SE CLICAR NO BOTAO DE ENVIAR MENSAGEM ENVIA A MENSAGEM PRA CAIXA DO CHAT
                 elif send_message_button_rect.collidepoint(event.pos):
                     print("Minha mensagem: " + input_para_caixa_do_chat)
                     enviar_mensagem(name + ": " + input_para_caixa_do_chat, jogador_atual)
+                elif botao_passar_turno_rect.collidepoint(event.pos):
+                    if vez_de == "vermelho" and minhas_pecas == "vermelho":
+                        vez_de = "preto"
+                        pygame.draw.circle(screen, preto, (175, 25), 15)
+                        pygame.display.flip()
+                        send("TROCA", client_socket)
+                    elif vez_de == "preto" and minhas_pecas == "preto":
+                        vez_de = "vermelho"
+                        pygame.draw.circle(screen, vermelho, (175, 25), 15)
+                        pygame.display.flip()
+                        send("TROCA", client_socket)
+                elif botao_desistir_rect.collidepoint(event.pos):
+                    if minhas_pecas == "vermelho":
+                        ganhador = "preto"
+                        print(ganhador)
+                    elif minhas_pecas == "preto":
+                        ganhador = "vermelho"
+                        print(ganhador)
+
                 position_mouse = pygame.mouse.get_pos()
                 color = screen.get_at(pygame.mouse.get_pos())
                 x_da_peca = position_mouse[0]
                 y_da_peca = position_mouse[1]
-                if len(circulos) < 2:
+                if len(circulos) < 2 and vez_de == minhas_pecas:
                     circulo = tabuleiro.verifica_se_e_bola(x_da_peca, y_da_peca)
                     if len(circulos) == 0 and circulo is not None:
                         circulos.append(circulo)
@@ -496,7 +559,7 @@ while not done:
 
                     elif len(circulos) == 1 and (
                             (circulos[0].get_cor() == amarelo or circulos[
-                                0].get_cor() == vermelho) and color == branco):
+                                0].get_cor() == vermelho) and color == branco and minhas_pecas == "vermelho"):
                         x_desejada = position_mouse[0]
                         y_desejado = position_mouse[1]
                         x_da_peca, y_da_peca = circulos[0].get_x_y()
@@ -507,11 +570,11 @@ while not done:
                             "MOVE " + str(x_da_peca) + " " + str(y_da_peca) + " " + str(x_desejada) + " " + str(
                                 y_desejado),
                             client_socket)
-                        # tabuleiro.verifica_se_peca_foi_comida(x_da_peca, y_da_peca)
                         tabuleiro.verifica_se_peca_foi_comida(x_desejada, y_desejado)
                         circulos = []
                     elif len(circulos) == 1 and (
-                            (circulos[0].get_cor() == preto or circulos[0].get_cor() == roxo) and color == verde):
+                            (circulos[0].get_cor() == preto or circulos[
+                                0].get_cor() == roxo) and color == verde and minhas_pecas == "preto"):
                         x_desejada = position_mouse[0]
                         y_desejado = position_mouse[1]
                         x_da_peca, y_da_peca = circulos[0].get_x_y()
@@ -521,7 +584,6 @@ while not done:
                             "MOVE " + str(x_da_peca) + " " + str(y_da_peca) + " " + str(x_desejada) + " " + str(
                                 y_desejado),
                             client_socket)
-                        # tabuleiro.verifica_se_peca_foi_comida(x_da_peca, y_da_peca)
                         tabuleiro.verifica_se_peca_foi_comida(x_desejada, y_desejado)
                         circulos = []
                     else:
