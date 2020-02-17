@@ -7,6 +7,7 @@ from bolas import Bola
 from caixadochat import CaixaChat
 from digitacaodotexto import TextoEntrada
 from Botao import Botao
+import random
 
 
 def send(mensagem, client_socket):
@@ -39,7 +40,7 @@ def receive(client_socket):
 
 
 HOST = input("Qual o IP do servidor que você deseja conectar?")
-PORT = 33000
+PORT = 3300
 
 client_socket = socket(AF_INET, SOCK_STREAM)
 client_socket.connect((HOST, PORT))
@@ -87,6 +88,11 @@ def enviar_mensagem(input, jogador_atual):
 def acao(message):
     print(message)
     return message.split()[0]
+
+
+def sorteio():
+    numero_sorteado = random.randint(0, 100)
+    return numero_sorteado
 
 
 class Tabuleiro():
@@ -233,12 +239,9 @@ class Tabuleiro():
 
     def muda_posicao_circulo(self, x_atual, y_atual, x_desejada, y_desejado):
         global circulo, a, b
-        # print("entrei aqui1")
         for teste in self.bolas:
-            # print("entrei aqui2")
             (a, b) = teste.get_x_y()
             if verifica_dentro_do_circulo(x_atual, y_atual, a, b, 7):
-                # print("entrei aqui ")
                 circulo = teste
                 if circulo is not None:
                     cor = circulo.get_cor()
@@ -300,8 +303,6 @@ class Tabuleiro():
     def verifica_se_peca_foi_comida(self, x_agr, y_agr):
         for bola in self.bolas:
             (i, k) = bola.get_x_y()
-            # print(i, k)
-            # print(verifica_dentro_do_circulo(x_agr, y_agr, i, k, 7))
             if verifica_dentro_do_circulo(x_agr, y_agr, i, k, 7):
                 bolab = bola
                 if bolab is not None:
@@ -351,7 +352,7 @@ class Tabuleiro():
                                                 circulo_dentro_do_triangolo.set_x_y((0, 0))
                                                 circulo_dentro_do_triangolo.set_cor(cinza)
                     elif eh_amarelo_ou_vermelho:
-                        # print("entrei aqui")
+
                         for circolo in self.bolas:
                             (a, b) = circolo.get_x_y()
                             verifica_se_ta_em_cima_esquerda = (a == x - 15) and (b == y - 38)
@@ -361,17 +362,16 @@ class Tabuleiro():
                             verifica_se_ta_do_lado_direito = (a == x + 30) and (b == y)
                             verifica_se_ta_do_lado_esquerdo = (a == x - 30) and (b == y)
                             if verifica_se_ta_do_lado_esquerdo:
-                                # print("entrei aqui2")
+
                                 for circolo_do_lado_esquerdo in self.bolas:
                                     (a, b) = circolo_do_lado_esquerdo.get_x_y()
                                     verifica_se_ta_em_baixo_esquerda = (a == x - 15) and (b == y + 38)
                                     if verifica_se_ta_em_baixo_esquerda:
-                                        # print("entrei aqui3")
+
                                         for circolo_dentro_do_triangulo in self.bolas:
                                             (a, b) = circolo_dentro_do_triangulo.get_x_y()
                                             verifica_se_ta_dentro_pela_esquerda = (a == x - 15) and (b == y + 17)
                                             if verifica_se_ta_dentro_pela_esquerda:
-                                                # print("entrei aqui 4")
                                                 circolo_dentro_do_triangulo.set_x_y((0, 0))
                                                 circolo_dentro_do_triangulo.set_cor(cinza)
                             elif verifica_se_ta_do_lado_direito:
@@ -381,7 +381,7 @@ class Tabuleiro():
                                     if verifica_se_tem_em_baixo_direito:
                                         for circulo_dentro_do_triangulo in self.bolas:
                                             (a, b) = circulo_dentro_do_triangulo.get_x_y()
-                                            verifica_se_ta_dentro_pela_direita = (a == x - 15) and (b == y + 17)
+                                            verifica_se_ta_dentro_pela_direita = (a == x + 15) and (b == y + 17)
                                             if verifica_se_ta_dentro_pela_direita:
                                                 circulo_dentro_do_triangulo.set_x_y((0, 0))
                                                 circulo_dentro_do_triangulo.set_cor(cinza)
@@ -400,25 +400,40 @@ class Tabuleiro():
                     tabuleiro.desenha_tabuleiro(screen)
                     pygame.display.flip()
 
+    def teste(self):
+        count = 0
+        for i in self.bolas_consulta:
+            a, b = i.get_x_y()
+            cor = i.get_cor()
+            self.bolas[count].set_x_y((a, b))
+            self.bolas[count].set_cor(cor)
+            count = count + 1
+        pygame.display.flip()
+
     def verifica_se_tem_ganhador(self):
         cor_preto_ou_roxo = 0
         cor_amarelho_ou_vermelho = 0
         for bola in self.bolas:
             cor = bola.get_cor()
-            # print(cor)
             if cor == preto or cor == roxo:
                 cor_preto_ou_roxo = cor_preto_ou_roxo + 1
             if cor == amarelo or cor == vermelho:
                 cor_amarelho_ou_vermelho = cor_amarelho_ou_vermelho + 1
-
         if cor_preto_ou_roxo <= 2:
             ganhador = "vermelho"
-            print("O ganhador foi " + ganhador)
+            screen.blit(overmelhovenceu, (0, 0))
             return ganhador
         elif cor_amarelho_ou_vermelho <= 2:
             ganhador = "preto"
-            print("O ganhador foi " + ganhador)
+            screen.blit(opretovenceu, (0, 0))
             return ganhador
+
+
+def resetar_partida():
+    tabuleiro.teste()
+    caixa_chat = CaixaChat(screen, 500, 80, 600, 350, brancola)
+    tabuleiro.desenha_tabuleiro(screen)
+    pygame.display.flip()
 
 
 MOUSE_LEFT = 1
@@ -427,6 +442,8 @@ pygame.init()
 size = [1200, 800]
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Bizingo")
+overmelhovenceu = pygame.image.load("Vitoria_do_Vermelho.jpg")
+opretovenceu = pygame.image.load("Vitoria_do_Preto.jpg")
 circulos = []
 screen.fill(cinza)
 minhas_pecas = ""
@@ -450,12 +467,13 @@ texto_entrada = TextoEntrada(screen, 500, 460, 400, 110, brancola, "")
 input_para_caixa_do_chat = ""
 message_display(90, 25, "Jogador atual: ", 20, (0, 0, 0, 255))
 message_display(700, 650, "Para começar escolha sua cor: ", 20, (0, 0, 0, 255))
-pygame.draw.circle(screen, vermelho, (175, 25), 15)
 botao_esconde_texto = Botao("", (128, 128, 128), cinza)
 botao_cor_cinza = Botao("", (128, 128, 128), cinza)
+botao_resetar_partida = Botao("Resetar partida", (0, 0, 255), preto)
 jogador_atual = "jogador"
-vez_de = "vermelho"
+vez_de = ""
 pecas_jogador = ""
+botao_resetar_partida_rect = botao_resetar_partida.desenha_botao(screen, -50, -50, 1, 1)
 tabuleiro = Tabuleiro()
 tabuleiro.desenha_tabuleiro(screen)
 done = False
@@ -463,25 +481,41 @@ clock = pygame.time.Clock()
 mover = True
 
 while not done:
-
     for event in pygame.event.get():  # User did something
         try:
             mensagem, username = receive(client_socket)
             if acao(mensagem) == "CHAT":
                 caixa_chat.adiciona_texto(jogador_atual, mensagem[5:])
                 caixa_chat.atualiza_tela_chatarray(jogador_atual)
+            elif acao(mensagem) == "RESET":
+                resetar_partida()
+            elif acao(mensagem) == "VCOMECA":
+                pygame.draw.circle(screen, vermelho, (175, 25), 15)
+                pygame.display.flip()
+            elif acao(mensagem) == "PCOMECA":
+                pygame.draw.circle(screen, preto, (175, 25), 15)
+                pygame.display.flip()
             elif acao(mensagem) == "MOVE":
                 args = mensagem.split()
                 tabuleiro.muda_posicao_circulo(int(args[1]), int(args[2]), + int(args[3]), int(args[4]))
                 tabuleiro.verifica_se_peca_foi_comida(int(args[3]), int(args[4]))
-                # print(tabuleiro.verifica_se_tem_ganhador())
                 tabuleiro.verifica_se_tem_ganhador()
                 tabuleiro.desenha_tabuleiro(screen)
                 pygame.display.flip()
+            elif acao(mensagem) == "VGANHOU":
+                screen.fill(cinza)
+                screen.blit(overmelhovenceu, (0, 0))
+                pygame.display.flip()
+            elif acao(mensagem) == "PGANHOU":
+                screen.fill(cinza)
+                screen.blit(opretovenceu, (0, 0))
+                pygame.display.flip()
             elif acao(mensagem) == "VERMELHO":
                 botao_cor_cinza_rect = botao_cor_cinza.desenha_botao(screen, 650, 680, 100, 50)
+                pygame.display.flip()
             elif acao(mensagem) == "PRETO":
                 botao_cor_cinza_rect = botao_cor_cinza.desenha_botao(screen, 850, 680, 100, 50)
+                pygame.display.flip()
             elif acao(mensagem) == "TROCA":
                 if vez_de == "vermelho":
                     vez_de = "preto"
@@ -494,8 +528,12 @@ while not done:
         except:
             pass
         if event.type == pygame.QUIT:  # If user clicked close
-            done = True  # Flag that we are done so we exit this loop
-        teste = True
+            if minhas_pecas == "vermelho":
+                send("PGANHOU", client_socket)
+                done = True  # Flag that we are done so we exit this loop
+            elif minhas_pecas == "preto":
+                send("VGANHOU", client_socket)
+                done = True
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == MOUSE_LEFT:
                 if botao_cor_vermelho_rect.collidepoint(event.pos) and minhas_pecas != "preto":
@@ -506,8 +544,22 @@ while not done:
                         "VERMELHO ", client_socket)
                     botao_cor_cinza_rect = botao_cor_cinza.desenha_botao(screen, 850, 680, 100, 50)
                     pygame.display.flip()
-                    botao_esconde_texto_rect = botao_esconde_texto.desenha_botao(screen, 500, 600, 500, 200)
+                    botao_esconde_texto_rect = botao_esconde_texto.desenha_botao(screen, 500, 600, 400, 100)
+                    botao_resetar_partida_rect = botao_resetar_partida.desenha_botao(screen, 700, 680, 200, 50)
                     message_display(150, 750, "JOGADOR VERMELHO ", 20, (255, 0, 0, 255))
+
+                    sort = sorteio()
+                    print(sorteio())
+                    if sort > 50:
+                        vez_de = "vermelho"
+                        pygame.draw.circle(screen, vermelho, (175, 25), 15)
+                        send("VCOMECA",client_socket)
+
+                    elif sort < 50:
+                        vez_de = "preto"
+                        pygame.draw.circle(screen, preto, (175, 25), 15)
+                        send("PCOMECA", client_socket)
+
                     tabuleiro.desenha_tabuleiro(screen)
                     pygame.display.flip()
                 elif botao_cor_preto_rect.collidepoint(event.pos) and minhas_pecas != "vermelho":
@@ -518,14 +570,16 @@ while not done:
                         "PRETO ", client_socket)
                     botao_cor_cinza_rect = botao_cor_cinza.desenha_botao(screen, 650, 680, 100, 50)
                     botao_esconde_texto_rect = botao_esconde_texto.desenha_botao(screen, 500, 600, 500, 200)
+                    botao_resetar_partida_rect = botao_resetar_partida.desenha_botao(screen, 700, 680, 200, 50)
                     tabuleiro.desenha_tabuleiro(screen)
                     message_display(150, 750, "JOGADOR PRETO ", 20, (0, 0, 0, 255))
                     pygame.display.flip()
+                elif botao_resetar_partida_rect.collidepoint(event.pos):
+                    resetar_partida()
+                    send("RESET", client_socket)
                 elif texto_entrada.get_input_text_rect().collidepoint(event.pos):
                     texto_entrada.handle_event(event)
-                # SE CLICAR NO BOTAO DE ENVIAR MENSAGEM ENVIA A MENSAGEM PRA CAIXA DO CHAT
                 elif send_message_button_rect.collidepoint(event.pos):
-                    print("Minha mensagem: " + input_para_caixa_do_chat)
                     enviar_mensagem(name + ": " + input_para_caixa_do_chat, jogador_atual)
                 elif botao_passar_turno_rect.collidepoint(event.pos):
                     if vez_de == "vermelho" and minhas_pecas == "vermelho":
@@ -541,11 +595,14 @@ while not done:
                 elif botao_desistir_rect.collidepoint(event.pos):
                     if minhas_pecas == "vermelho":
                         ganhador = "preto"
-                        print(ganhador)
+                        screen.fill(cinza)
+                        screen.blit(opretovenceu, (0, 0))
+                        pygame.display.flip()
                     elif minhas_pecas == "preto":
                         ganhador = "vermelho"
-                        print(ganhador)
-
+                        screen.fill(cinza)
+                        screen.blit(overmelhovenceu, (0, 0))
+                        pygame.display.flip()
                 position_mouse = pygame.mouse.get_pos()
                 color = screen.get_at(pygame.mouse.get_pos())
                 x_da_peca = position_mouse[0]
@@ -554,17 +611,12 @@ while not done:
                     circulo = tabuleiro.verifica_se_e_bola(x_da_peca, y_da_peca)
                     if len(circulos) == 0 and circulo is not None:
                         circulos.append(circulo)
-                        # print(circulos[0].get_x_y())
-                        # print('Como era pra ta:' + str(circulos[0]))
-
                     elif len(circulos) == 1 and (
                             (circulos[0].get_cor() == amarelo or circulos[
                                 0].get_cor() == vermelho) and color == branco and minhas_pecas == "vermelho"):
                         x_desejada = position_mouse[0]
                         y_desejado = position_mouse[1]
                         x_da_peca, y_da_peca = circulos[0].get_x_y()
-
-                        print(x_da_peca, y_da_peca)
                         tabuleiro.muda_posicao_circulo(x_da_peca, y_da_peca, x_desejada, y_desejado)
                         send(
                             "MOVE " + str(x_da_peca) + " " + str(y_da_peca) + " " + str(x_desejada) + " " + str(
@@ -578,7 +630,6 @@ while not done:
                         x_desejada = position_mouse[0]
                         y_desejado = position_mouse[1]
                         x_da_peca, y_da_peca = circulos[0].get_x_y()
-                        print(x_da_peca, y_da_peca)
                         tabuleiro.muda_posicao_circulo(x_da_peca, y_da_peca, x_desejada, y_desejado)
                         send(
                             "MOVE " + str(x_da_peca) + " " + str(y_da_peca) + " " + str(x_desejada) + " " + str(

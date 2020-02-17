@@ -39,7 +39,7 @@ class TextoEntrada:
                 self.ativo = True
             else:
                 self.ativo = False
-            self.cor = azul if self.ativo else (255, 120, 155)
+            self.cor = brancola if self.ativo else (255, 120, 155)
             self.draw(self.screen)
         if event.type == pygame.KEYDOWN:
             if self.ativo:

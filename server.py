@@ -12,7 +12,7 @@ def get_listening_socket():
 
 LIMIT = 3
 HOST = ''
-PORT = 33000
+PORT = 3300
 
 server_socket = get_listening_socket()
 sockets_list = [server_socket]
