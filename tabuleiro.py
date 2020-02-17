@@ -490,9 +490,11 @@ while not done:
             elif acao(mensagem) == "RESET":
                 resetar_partida()
             elif acao(mensagem) == "VCOMECA":
+                vez_de = "vermelho"
                 pygame.draw.circle(screen, vermelho, (175, 25), 15)
                 pygame.display.flip()
             elif acao(mensagem) == "PCOMECA":
+                vez_de = "preto"
                 pygame.draw.circle(screen, preto, (175, 25), 15)
                 pygame.display.flip()
             elif acao(mensagem) == "MOVE":
